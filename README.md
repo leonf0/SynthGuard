@@ -45,7 +45,7 @@ $$\pi_k^{\text{new}} = \frac{1}{N} \sum_{i=1}^{N} r_{ik}, \quad \boldsymbol{\mu}
 The E and M steps alternate until the change in log-likelihood falls below a convergence threshold.
 
 <p align="center">
-  <img src="assets/diagram_gmm.png" alt="GMM Architecture" width="80%"/>
+  <img src="Architecture_diagrams/diagram_gmm.png" alt="GMM Architecture" width="80%"/>
 </p>
 
 #### Training and Fitting
@@ -75,7 +75,7 @@ The stationary distribution $\boldsymbol{\pi}^*$ satisfies $\boldsymbol{\pi}^{*\
 $$\mathbb{E}[\text{holding time in } i] = \frac{1}{1 - A_{ii}}$$
 
 <p align="center">
-  <img src="assets/diagram_markov.png" alt="Markov Chain Architecture" width="80%"/>
+  <img src="Architecture_diagrams/diagram_markov.png" alt="Markov Chain Architecture" width="80%"/>
 </p>
 
 #### Training and Fitting
@@ -156,7 +156,7 @@ $$\text{GRN}(\mathbf{x}) = \text{LayerNorm}\!\left(\mathbf{x} + \text{GLU}\!\lef
 where GLU is a Gated Linear Unit providing multiplicative suppression.
 
 <p align="center">
-  <img src="assets/diagram_tft.png" alt="Temporal Fusion Transformer Architecture" width="80%"/>
+  <img src="Architecture_diagrams/diagram_tft.png" alt="Temporal Fusion Transformer Architecture" width="80%"/>
 </p>
 
 **Architecture Components:**
@@ -193,7 +193,7 @@ In the **Conditional** variant, both encoder and decoder receive a conditioning 
 $$q_\phi(\mathbf{z}|\mathbf{x}, \mathbf{c}), \quad p_\theta(\mathbf{x}|\mathbf{z}, \mathbf{c})$$
 
 <p align="center">
-  <img src="assets/diagram_cvae.png" alt="CVAE Architecture" width="80%"/>
+  <img src="Architecture_diagrams/diagram_cvae.png" alt="CVAE Architecture" width="80%"/>
 </p>
 
 **Architecture Components:**
@@ -230,7 +230,7 @@ $$\mathcal{L} = \mathbb{E}_{t, \mathbf{x}_0, \boldsymbol{\epsilon}}\!\left[\left
 Sampling proceeds by iteratively denoising from $\mathbf{x}_T \sim \mathcal{N}(0, \mathbf{I})$ using the learned score.
 
 <p align="center">
-  <img src="assets/diagram_diffusion.png" alt="Score-Based Diffusion Architecture" width="80%"/>
+  <img src="Architecture_diagrams/diagram_diffusion.png" alt="Score-Based Diffusion Architecture" width="80%"/>
 </p>
 
 **Architecture Components:**
@@ -269,7 +269,7 @@ $$\mathbf{h}^{(l)} = \text{ReLU}\!\left(\mathbf{x}^{(l)} + \text{Conv}_{d_l}\!\l
 with a $1\times 1$ convolution on the skip path when input and output channel dimensions differ.
 
 <p align="center">
-  <img src="assets/diagram_tcn.png" alt="TCN Discriminator Ensemble Architecture" width="80%"/>
+  <img src="Architecture_diagrams/diagram_tcn.png" alt="TCN Discriminator Ensemble Architecture" width="80%"/>
 </p>
 
 **Architecture Components:**
