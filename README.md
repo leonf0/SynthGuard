@@ -286,7 +286,70 @@ with a $1\times 1$ convolution on the skip path when input and output channel di
 - **Global Aggregation:** After the dilated stack, a global average pooling operation collapses the temporal dimension to a fixed-length representation.
 - **Classification Head:** A two-layer MLP projecting the pooled representation to a scalar logit representing the probability that the input sequence is real.
 
-### 3.2 Ensemble Training
+### 3.2 Discriminator Training Dataset
+
+The discriminator requires a training set that spans the full spectrum of realism, from genuine market data through competent-but-imperfect model output to pathologically unrealistic sequences. The dataset is constructed with $N = 20{,}000$ sequences of length $T = 252$ (one trading year), each paired with a regime label sequence of the same length.
+
+#### Class Structure
+
+The dataset is balanced at the binary level: 50% real ($y = 0$) and 50% synthetic ($y = 1$). The synthetic class is further subdivided to ensure the discriminator learns to detect both subtle and obvious departures from realism:
+
+| Source | Count | Label | Purpose |
+|--------|-------|-------|---------|
+| Real — pooled equities | 5,000 | 0 | Cross-equity windows sampled from aligned multi-asset returns |
+| Real — individual equities | 5,000 | 0 | Per-ticker windows preserving idiosyncratic dynamics |
+| Model-based synthetic | 5,000 | 1 | Output from the six trained generators (Section 2) |
+| Obviously-fake synthetic | 5,000 | 1 | Twelve pathological generators designed to violate stylized facts |
+
+#### Real Sequence Sampling
+
+Real sequences are extracted as contiguous 252-day windows from the reference equity universe. For each sample, a ticker is selected uniformly at random, a valid start index is drawn, and the return and regime label sub-arrays are sliced in parallel. Windows containing any NaN values are rejected and redrawn. The pooled variant draws from a cross-sectionally aligned DataFrame (all tickers on a common date index); the individual variant draws from per-ticker Series objects, preserving ticker-specific missing-data patterns.
+
+#### Model-Based Synthetic Generation
+
+Each of the six generators from Section 2 contributes sequences via autoregressive rollout. A 60-day seed window is sampled from a real equity series to initialise the generator's conditioning context. A regime sequence of length 252 is then drawn from the fitted Markov Chain (Section 1.3), starting from the regime active at the end of the seed window. The generator produces one return per timestep, conditioned on the trailing 30-day window and the current regime label:
+
+$$r_{t+1} = G_\theta\left(\{r_{t-W+1}, \ldots, r_t\}, s_t\right) + \eta_t$$
+
+where $\eta_t$ is a small residual noise term scaled by the model's validation residual standard deviation. The per-model allocation reflects computational cost:
+
+| Generator | Sequences |
+|-----------|-----------|
+| GBM | 1,000 |
+| GARCH(1,1) | 1,000 |
+| Heston | 1,000 |
+| TFT | 900 |
+| CVAE | 1,000 |
+| Score Diffusion | 100 |
+
+The diffusion model's lower count reflects its $O(T_{\text{infer}})$ DDIM sampling cost per step, which makes large-scale autoregressive rollout prohibitively slow.
+
+#### Obviously-Fake Generators
+
+Twelve pathological generators produce sequences that violate one or more stylized facts by construction. These serve as easy negatives that anchor the discriminator's decision boundary and prevent it from collapsing to a trivial solution on hard model-synthetic examples alone:
+
+| Generator | Violated Property |
+|-----------|------------------|
+| Constant drift | Zero variance, deterministic trend |
+| i.i.d. Gaussian | No volatility clustering, thin tails |
+| Perfect alternation | Negative lag-1 autocorrelation $\approx -1$ |
+| Linear trend | Deterministic, non-stationary mean |
+| Sinusoidal | Periodic structure, no stochasticity |
+| Non-negative returns | Asymmetry violation (all $r_t \geq 0$) |
+| Frequent jumps | Sparse non-zero entries, no clustering |
+| Piecewise deterministic | Constant within segments, discontinuous transitions |
+| Quantized levels | Discrete support, no continuous distribution |
+| Exploding variance | Non-stationary variance, monotonically increasing |
+| Mechanical mean reversion | Deterministic AR(1) with $|\phi| > 0.8$ |
+| Copy-pasted blocks | Exact periodicity from tiled subsequences |
+
+Each fake sequence is assigned a regime label sequence drawn from the Markov Chain (with a random initial state), ensuring the discriminator cannot trivially distinguish real from fake based on regime label statistics alone.
+
+#### Assembly and Shuffling
+
+The four blocks are concatenated along the batch axis, producing arrays of shape $(20000, 252)$ for returns, $(20000, 252)$ for regime labels, and $(20000,)$ for binary labels. A random permutation is applied jointly across all three arrays to eliminate any ordering artefact before the train/validation/calibration split described in Section 3.3.
+
+### 3.3 Ensemble Training
 
 The discriminator is trained as a binary classifier: real reference windows are labelled 0, synthetic windows from each generator are labelled 1. Training uses the binary cross-entropy loss:
 
@@ -294,7 +357,7 @@ $$\mathcal{L}_{\text{disc}} = -\mathbb{E}_{\mathbf{x} \sim p_{\text{real}}}\left
 
 The ensemble consists of $M$ independently initialised and trained TCNs. Each member is trained on a different bootstrap resample of the training windows, introducing diversity through data perturbation rather than architectural variation. Class imbalance between the single real series and multiple synthetic generators is addressed by upsampling real windows to match the total synthetic count.
 
-### 3.3 Inference
+### 3.4 Inference
 
 At inference, a candidate return series is segmented into overlapping windows. Each window is passed through all $M$ ensemble members, producing $M$ real/synthetic probability estimates. The ensemble prediction is the mean probability across members, and uncertainty is quantified as the standard deviation. The realism score reported by the auditor is the mean ensemble probability that the series is real, broken down per regime by filtering windows to those assigned each regime label by the GMM.
 
