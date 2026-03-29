@@ -306,7 +306,7 @@ At inference, a candidate return series is segmented into overlapping windows. E
 
 **Intuition:** Real financial returns have heavier tails than a Gaussian distribution — large daily moves occur far more frequently than the normal distribution predicts. This test checks whether the synthetic series reproduces this property.
 
-**Theory:** Excess kurtosis is defined as $\kappa = \mathbb{E}[(r - \mu)^4]/\sigma^4 - 3$. For a Gaussian, $\kappa = 0$; empirical equity returns typically show $\kappa \in [2, 10]$. The test statistic compares $\hat{\kappa}_{\text{synth}}$ against the reference distribution of $\hat{\kappa}_{\text{real}}$ via a bootstrap confidence interval.
+**Theory:** Excess kurtosis is defined as $\kappa = \mathbb{E}[(r - \mu)^4]/\sigma^4 - 3$. For a Gaussian, $\kappa = 0$; empirical equity returns typically show $\kappa \in [2, 10]$. The test statistic compares $`\hat{\kappa}_{\mathrm{synth}}`$ against the reference distribution of $`\hat{\kappa}_{\mathrm{real}}`$ via a bootstrap confidence interval.
 
 For the tail specifically, the Hill estimator provides a non-parametric estimate of the tail index $\alpha$ of a regularly varying distribution $P(|r| > x) \sim x^{-\alpha}$:
 
