@@ -30,17 +30,17 @@ Regime conditioning solves this by partitioning the series into latent states be
 
 A Gaussian Mixture Model (GMM) is a probabilistic model that represents the data-generating distribution as a weighted sum of $K$ Gaussian components:
 
-$$p(\mathbf{x}) = \sum_{k=1}^{K} \pi_k \, \mathcal{N}(\mathbf{x} \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$$
+$$p(\mathbf{x}) = \sum_{k=1}^{K} \pi_k \ \mathcal{N}(\mathbf{x} \mid \boldsymbol{\mu}_k \boldsymbol{\Sigma}_k)$$
 
 where $\pi_k \geq 0$ are the mixing weights with $\sum_{k=1}^{K} \pi_k = 1$, and each component is parameterised by a mean vector $\boldsymbol{\mu}_k$ and covariance matrix $\boldsymbol{\Sigma}_k$.
 
 The model is trained via the Expectation-Maximisation (EM) algorithm. In the **E-step**, the posterior probability (responsibility) that component $k$ generated observation $\mathbf{x}_i$ is computed:
 
-$$r_{ik} = \frac{\pi_k \, \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)}{\sum_{j=1}^{K} \pi_j \, \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_j, \boldsymbol{\Sigma}_j)}$$
+$$r_{ik} = \frac{\pi_k \ \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_k \boldsymbol{\Sigma}_k)}{\sum_{j=1}^{K} \pi_j \ \mathcal{N}(\mathbf{x}_i \mid \boldsymbol{\mu}_j \boldsymbol{\Sigma}_j)}$$
 
 In the **M-step**, the parameters are updated to maximise the expected complete-data log-likelihood:
 
-$$\pi_k^{\text{new}} = \frac{1}{N} \sum_{i=1}^{N} r_{ik}, \quad \boldsymbol{\mu}_k^{\text{new}} = \frac{\sum_i r_{ik} \mathbf{x}_i}{\sum_i r_{ik}}, \quad \boldsymbol{\Sigma}_k^{\text{new}} = \frac{\sum_i r_{ik} (\mathbf{x}_i - \boldsymbol{\mu}_k^{\text{new}})(\mathbf{x}_i - \boldsymbol{\mu}_k^{\text{new}})^\top}{\sum_i r_{ik}}$$
+$$\pi_k^{\text{new}} = \frac{1}{N} \sum_{i=1}^{N} r_{ik} \quad \boldsymbol{\mu}_k^{\text{new}} = \frac{\sum_i r_{ik} \mathbf{x}_i}{\sum_i r_{ik}} \quad \boldsymbol{\Sigma}_k^{\text{new}} = \frac{\sum_i r_{ik} (\mathbf{x}_i - \boldsymbol{\mu}_k^{\text{new}})(\mathbf{x}_i - \boldsymbol{\mu}_k^{\text{new}})^\top}{\sum_i r_{ik}}$$
 
 The E and M steps alternate until the change in log-likelihood falls below a convergence threshold.
 
@@ -66,7 +66,7 @@ Once fitted, the GMM assigns each time step a hard regime label (via argmax) and
 
 A first-order discrete-time Markov Chain models a sequence of states $\{s_t\}_{t=1}^{T}$, $s_t \in \{1, \ldots, K\}$, under the assumption that the future is conditionally independent of the past given the present:
 
-$$P(s_{t+1} = j \mid s_t = i, s_{t-1}, \ldots) = P(s_{t+1} = j \mid s_t = i) = A_{ij}$$
+$$P(s_{t+1} = j \mid s_t = i s_{t-1} \ldots) = P(s_{t+1} = j \mid s_t = i) = A_{ij}$$
 
 The model is fully specified by its **transition matrix** $\mathbf{A} \in [0,1]^{K \times K}$, where $A_{ij}$ is the probability of transitioning from regime $i$ to regime $j$, and each row sums to one: $\sum_j A_{ij} = 1$.
 
