@@ -45,14 +45,25 @@ $$\pi_k^{\text{new}} = \frac{1}{N} \sum_{i=1}^{N} r_{ik} \quad \boldsymbol{\mu}_
 The E and M steps alternate until the change in log-likelihood falls below a convergence threshold.
 
 <p align="center">
-  <img src="Architecture_diagrams/diagram_gmm.png" alt="GMM Architecture" width="80%"/>
+  <img src="Architecture_diagrams/diagram_vix_regime.png" alt="GMM Architecture" width="80%"/>
 </p>
 
 #### Training and Fitting
 
-The feature space presented to the GMM is constructed from a rolling window over the input return series. For every time step $t$, the feature vector $\mathbf{x}_t$ encodes: the rolling mean return, rolling volatility (standard deviation of returns), rolling skewness, rolling excess kurtosis, and a measure of short-lag autocorrelation in squared returns as a proxy for volatility clustering intensity. 
+The feature space presented to the GMM is constructed from a rolling window over both VIX and treasury yield data, in order to account for macro regimes as opposed to individual equities.  
 
-Covariance structure is constrained to full matrices to capture inter-feature correlations but regularised with a small diagonal prior to prevent degeneracy on low-variance components.
+A Gaussian Mixture Model with $K = 3$ components is then fitted on the standardised feature matrix $\mathbf{X}$ via EM with this configuration:
+
+- **Covariance type:** full — each component has its own unconstrained covariance matrix, capturing correlations between VIX level, VIX momentum, and yield changes
+- **Initialisation:** k-means++ seeding, 3 independent restarts (`n_init=3`), best run selected by log-likelihood
+- **Regularisation:** diagonal covariance floor `reg_covar=1e-6` to prevent degeneracy
+- **Convergence:** maximum 300 EM iterations, tolerance $10^{-4}$ on log-likelihood change
+
+After fitting, components are assigned economic labels by sorting on their mean VIX EMA value across assigned observations:
+
+$$\text{Regime label}_k = \text{REGIME\_NAMES}\!\left[\text{rank}\!\left(\frac{1}{|\mathcal{C}_k|}\sum_{t \in \mathcal{C}_k} \tilde{V}_t\right)\right]$$
+
+where $\mathcal{C}_k$ is the set of timesteps assigned to component $k$ by hard label (argmax responsibility). This produces three economically labelled regimes:
 
 #### Role in This Project
 
