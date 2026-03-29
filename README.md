@@ -366,7 +366,7 @@ Values greater than 1 indicate heavier downside. Second, the conditional tail ra
 
 **Theory:** Coarse volatility $\sigma^{\text{coarse}}_t$ is computed as the standard deviation of returns within non-overlapping windows of length $W_c$ (e.g., 20 days). Fine volatility $\sigma^{\text{fine}}_t$ is the standard deviation within sub-windows of length $W_f < W_c$ (e.g., 5 days). The coarse-fine correlation is:
 
-$$\rho_{\text{CF}} = \text{Corr}\!\left(\sigma^{\text{coarse}}_t, \sigma^{\text{fine}}_t\right)$$
+$$\rho_{\text{CF}} = \text{Corr}\left(\sigma^{\text{coarse}}_t, \sigma^{\text{fine}}_t\right)$$
 
 The Taylor effect additionally refers to the empirical observation that $\text{Corr}(|r_t|, |r_{t+k}|)$ decays more slowly than $\text{Corr}(r_t^2, r_{t+k}^2)$, indicating that absolute returns are more persistent than squared returns. The test computes both the coarse-fine correlation and the ratio of ACF decay rates for $|r_t|$ versus $r_t^2$, comparing both against the reference series via bootstrap.
 
@@ -378,7 +378,7 @@ The Taylor effect additionally refers to the empirical observation that $\text{C
 
 **Theory:** Returns are aggregated at horizons $h \in \{1, 5, 21, 63\}$ trading days by summing over non-overlapping windows. At each horizon, the Jarque-Bera test statistic is computed:
 
-$$\text{JB} = \frac{T}{6}\!\left(\hat{S}^2 + \frac{(\hat{\kappa})^2}{4}\right)$$
+$$\text{JB} = \frac{T}{6}\left(\hat{S}^2 + \frac{(\hat{\kappa})^2}{4}\right)$$
 
 where $\hat{S}$ is sample skewness and $\hat{\kappa}$ excess kurtosis. The test plots the JB statistic as a function of aggregation horizon for both real and synthetic series and measures the rate at which the statistic decays toward zero. A generator that fails aggregational Gaussianity either retains fat tails at long horizons (over-heavy tails) or converges too quickly (under-heavy tails at short horizons). The convergence profiles are compared using a curve-distance metric on the JB-vs-horizon series.
 
