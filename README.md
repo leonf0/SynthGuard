@@ -59,11 +59,7 @@ A Gaussian Mixture Model with $K = 3$ components is then fitted on the standardi
 - **Regularisation:** diagonal covariance floor `reg_covar=1e-6` to prevent degeneracy
 - **Convergence:** maximum 300 EM iterations, tolerance $10^{-4}$ on log-likelihood change
 
-After fitting, components are assigned economic labels by sorting on their mean VIX EMA value across assigned observations:
-
-$$\text{Regime label}_k = \text{REGIME\_NAMES}\!\left[\text{rank}\!\left(\frac{1}{|\mathcal{C}_k|}\sum_{t \in \mathcal{C}_k} \tilde{V}_t\right)\right]$$
-
-where $\mathcal{C}_k$ is the set of timesteps assigned to component $k$ by hard label (argmax responsibility). This produces three economically labelled regimes:
+After fitting, components are assigned economic labels (low, mid, high volatility) by sorting on their mean VIX EMA value across assigned observations.
 
 #### Role in This Project
 
@@ -113,7 +109,7 @@ The three parametric models serve as interpretable baselines. Each has a known c
 
 GBM is the canonical continuous-time model for asset prices, underpinning Black-Scholes option pricing. Log-returns are assumed to be i.i.d. Gaussian:
 
-$$\ln \frac{S_{t+1}}{S_t} = \mu \Delta t + \sigma \sqrt{\Delta t} \, \epsilon_t, \quad \epsilon_t \sim \mathcal{N}(0, 1)$$
+$$\ln \frac{S_{t+1}}{S_t} = \mu \Delta t + \sigma \sqrt{\Delta t} \ \epsilon_t, \quad \epsilon_t \sim \mathcal{N}(0, 1)$$
 
 GBM has no memory, no volatility clustering, and no fat tails. It is included as the weakest baseline — a generator that should fail virtually every stylized fact test beyond first-moment matching.
 
@@ -138,9 +134,9 @@ with the stationarity constraint $\alpha + \beta < 1$. GARCH reproduces volatili
 
 The Heston model allows the variance process to evolve stochastically and independently of the return process, with a correlation between the two Brownian drivers that produces the leverage effect:
 
-$$dS_t = \mu S_t \, dt + \sqrt{v_t} \, S_t \, dW_t^S$$
-$$dv_t = \kappa(\theta - v_t) \, dt + \xi \sqrt{v_t} \, dW_t^v$$
-$$dW_t^S \, dW_t^v = \rho \, dt$$
+$$dS_t = \mu S_t \ dt + \sqrt{v_t} \ S_t \ dW_t^S$$
+$$dv_t = \kappa(\theta - v_t) \ dt + \xi \sqrt{v_t} \ dW_t^v$$
+$$dW_t^S \ dW_t^v = \rho \ dt$$
 
 where $\kappa$ is the mean-reversion speed, $\theta$ the long-run variance, $\xi$ the volatility of volatility, and $\rho$ the leverage correlation. The Feller condition $2\kappa\theta > \xi^2$ ensures the variance process remains positive.
 
@@ -162,7 +158,7 @@ The model processes three categories of input: past observed covariates, known f
 
 Temporal dependencies are captured at two scales: a sequence of **LSTM encoders** processes local history, while a **multi-head self-attention** layer over the encoded sequence captures longer-range dependencies. Gated Residual Networks (GRNs) are used throughout as the core transformation block:
 
-$$\text{GRN}(\mathbf{x}) = \text{LayerNorm}\!\left(\mathbf{x} + \text{GLU}\!\left(\mathbf{W}_1 \, \text{ELU}(\mathbf{W}_2 \mathbf{x} + \mathbf{b}_2) + \mathbf{b}_1\right)\right)$$
+$$\text{GRN}(\mathbf{x}) = \text{LayerNorm}\left(\mathbf{x} + \text{GLU}\left(\mathbf{W}_1 \, \text{ELU}(\mathbf{W}_2 \mathbf{x} + \mathbf{b}_2) + \mathbf{b}_1\right)\right)$$
 
 where GLU is a Gated Linear Unit providing multiplicative suppression.
 
@@ -181,7 +177,7 @@ where GLU is a Gated Linear Unit providing multiplicative suppression.
 
 The TFT is trained in a teacher-forced autoregressive regime: at each step, the ground truth lagged return is provided as input rather than the model's own previous output. The loss is a pinball (quantile) loss summed across quantile levels:
 
-$$\mathcal{L} = \sum_{q \in \mathcal{Q}} \sum_t \max\!\left(q(y_t - \hat{y}_{t,q}),\, (q-1)(y_t - \hat{y}_{t,q})\right)$$
+$$\mathcal{L} = \sum_{q \in \mathcal{Q}} \sum_t \max\left(q(y_t - \hat{y}_{t,q}), (q-1)(y_t - \hat{y}_{t,q})\right)$$
 
 Regime labels from the GMM are injected as static categorical conditioning inputs, allowing the model to condition its generative distribution on the current regime.
 
@@ -195,7 +191,7 @@ At inference time, returns are generated autoregressively: a return is sampled f
 
 A Variational Autoencoder (VAE) is a latent-variable generative model that learns to encode observations into a structured latent space and decode samples from that space back into the data domain. It optimises a lower bound on the log-likelihood (the ELBO):
 
-$$\mathcal{L}_{\text{ELBO}} = \mathbb{E}_{q_\phi(\mathbf{z}|\mathbf{x})}\!\left[\log p_\theta(\mathbf{x}|\mathbf{z})\right] - D_{\text{KL}}\!\left(q_\phi(\mathbf{z}|\mathbf{x}) \,\|\, p(\mathbf{z})\right)$$
+$$\mathcal{L}_{\text{ELBO}} = \mathbb{E}_{q_\phi(\mathbf{z}|\mathbf{x})}\left[\log p_\theta(\mathbf{x}|\mathbf{z})\right] - D_{\text{KL}}\left(q_\phi(\mathbf{z}|\mathbf{x}) \,\|\, p(\mathbf{z})\right)$$
 
 The encoder $q_\phi(\mathbf{z}|\mathbf{x})$ approximates the posterior over latent variables; the decoder $p_\theta(\mathbf{x}|\mathbf{z})$ models the likelihood. The reparameterisation trick $\mathbf{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\epsilon}$, $\boldsymbol{\epsilon} \sim \mathcal{N}(0, \mathbf{I})$ makes the sampling step differentiable.
 
@@ -236,7 +232,7 @@ $$q(\mathbf{x}_t | \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_t;\, \sqrt{\bar{\alpha
 
 A neural network $\boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t)$ is trained to predict the noise $\boldsymbol{\epsilon}$ added at each step, via the simplified DDPM objective:
 
-$$\mathcal{L} = \mathbb{E}_{t, \mathbf{x}_0, \boldsymbol{\epsilon}}\!\left[\left\|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta\!\left(\sqrt{\bar{\alpha}_t}\, \mathbf{x}_0 + \sqrt{1-\bar{\alpha}_t}\, \boldsymbol{\epsilon},\, t\right)\right\|^2\right]$$
+$$\mathcal{L} = \mathbb{E}_{t, \mathbf{x}_0, \boldsymbol{\epsilon}}\left[\left\|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t}\, \mathbf{x}_0 + \sqrt{1-\bar{\alpha}_t}\, \boldsymbol{\epsilon},\, t\right)\right\|^2\right]$$
 
 Sampling proceeds by iteratively denoising from $\mathbf{x}_T \sim \mathcal{N}(0, \mathbf{I})$ using the learned score.
 
@@ -294,7 +290,7 @@ with a $1\times 1$ convolution on the skip path when input and output channel di
 
 The discriminator is trained as a binary classifier: real reference windows are labelled 0, synthetic windows from each generator are labelled 1. Training uses the binary cross-entropy loss:
 
-$$\mathcal{L}_{\text{disc}} = -\mathbb{E}_{\mathbf{x} \sim p_{\text{real}}}\!\left[\log D(\mathbf{x})\right] - \mathbb{E}_{\mathbf{x} \sim p_{\text{synth}}}\!\left[\log(1 - D(\mathbf{x}))\right]$$
+$$\mathcal{L}_{\text{disc}} = -\mathbb{E}_{\mathbf{x} \sim p_{\text{real}}}\left[\log D(\mathbf{x})\right] - \mathbb{E}_{\mathbf{x} \sim p_{\text{synth}}}\!\left[\log(1 - D(\mathbf{x}))\right]$$
 
 The ensemble consists of $M$ independently initialised and trained TCNs. Each member is trained on a different bootstrap resample of the training windows, introducing diversity through data perturbation rather than architectural variation. Class imbalance between the single real series and multiple synthetic generators is addressed by upsampling real windows to match the total synthetic count.
 
@@ -334,7 +330,7 @@ where $\hat{\rho}_k$ is the sample autocorrelation at lag $k$ and $T$ is the ser
 
 ### 4.3 Volatility Clustering
 
-**Intuition:** Even if returns are not autocorrelated, large moves tend to cluster together — a turbulent day is more likely to be followed by another turbulent day than by a calm one. This is the defining feature of GARCH-type dynamics and is captured by significant autocorrelation in the magnitude or squared returns.
+**Intuition:** Even if returns are not autocorrelated, large moves tend to cluster together, a turbulent day is more likely to be followed by another turbulent day than by a calm one. This is the defining feature of GARCH-type dynamics and is captured by significant autocorrelation in the magnitude or squared returns.
 
 **Theory:** The autocorrelation function of absolute returns $|r_t|$ and squared returns $r_t^2$ is computed up to a maximum lag $h$. Significant positive autocorrelation at short lags (typically decaying slowly over lags 1–20) constitutes evidence of volatility clustering. The test uses the Ljung-Box statistic on $r_t^2$ and compares the autocorrelation profile of the synthetic series against the reference using an $\ell_1$ distance over the ACF vector. A permutation test generates the null distribution of this distance under the hypothesis that the synthetic series has the same ACF structure as the reference.
 
