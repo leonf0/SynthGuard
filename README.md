@@ -271,7 +271,7 @@ By stacking layers with dilation factors $d = 1, 2, 4, \ldots, 2^{L-1}$, a TCN w
 
 Each TCN layer is wrapped in a **residual block** with weight normalisation:
 
-$$\mathbf{h}^{(l)} = \text{ReLU}\!\left(\mathbf{x}^{(l)} + \text{Conv}_{d_l}\!\left(\text{Dropout}\!\left(\text{Conv}_{d_l}(\mathbf{x}^{(l)})\right)\right)\right)$$
+$$\mathbf{h}^{(l)} = \text{ReLU}\left(\mathbf{x}^{(l)} + \text{Conv}_{d_l}\left(\text{Dropout}\left(\text{Conv}_{d_l}(\mathbf{x}^{(l)})\right)\right)\right)$$
 
 with a $1\times 1$ convolution on the skip path when input and output channel dimensions differ.
 
