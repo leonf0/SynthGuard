@@ -77,7 +77,7 @@ $$P(s_{t+1} = j \mid s_t = i s_{t-1} \ldots) = P(s_{t+1} = j \mid s_t = i) = A_{
 
 The model is fully specified by its **transition matrix** $\mathbf{A} \in [0,1]^{K \times K}$, where $A_{ij}$ is the probability of transitioning from regime $i$ to regime $j$, and each row sums to one: $\sum_j A_{ij} = 1$.
 
-The stationary distribution $\boldsymbol{\pi}^*$ satisfies $\boldsymbol{\pi}^{*\top} \mathbf{A} = \boldsymbol{\pi}^{*\top}$ and describes the long-run fraction of time spent in each regime. For an ergodic chain, the expected holding time in regime $i$ is:
+The stationary distribution $\boldsymbol{\pi}^{\top}$ satisfies $\boldsymbol{\pi}^{\top}\mathbf{A}=\boldsymbol{\pi}^{*\top}$ and describes the long-run fraction of time spent in each regime. For an ergodic chain, the expected holding time in regime $i$ is:
 
 $$\mathbb{E}[\text{holding time in } i] = \frac{1}{1 - A_{ii}}$$
 
@@ -204,7 +204,7 @@ $$q_\phi(\mathbf{z}|\mathbf{x}, \mathbf{c}), \quad p_\theta(\mathbf{x}|\mathbf{z
 </p>
 
 **Architecture Components:**
-- **Encoder:** A stack of 1D convolutional layers followed by a bidirectional GRU that processes an input window of returns. The final hidden state is projected to the mean $\boldsymbol{\mu}_\phi$ and log-variance $\log \boldsymbol{\sigma}^2_\phi$ of the posterior.
+- **Encoder:** A stack of 1D convolutional layers followed by a bidirectional GRU that processes an input window of returns. The final hidden state is projected to the mean $`\boldsymbol{\mu}_{\phi}`$ and log-variance $`\log \boldsymbol{\sigma}_{\phi}^{2}`$ of the posterior.
 - **Conditioning Injection:** The regime label is embedded as a learned dense vector and concatenated to both the encoder input at every timestep and to the decoder input at every step.
 - **Latent Bottleneck:** A fixed-dimensional Gaussian latent space. KL weight is annealed from 0 to 1 over the first training phase using a cyclical annealing schedule to prevent posterior collapse.
 - **Decoder:** A GRU-based autoregressive decoder that takes the sampled latent $\mathbf{z}$ concatenated with the conditioning vector and generates returns step-by-step.
@@ -222,7 +222,7 @@ At inference, a latent vector is sampled from the prior $\mathcal{N}(0, \mathbf{
 
 ##### Theory
 
-Score-based diffusion models learn to generate data by reversing a forward noising process. In the forward process, data $\mathbf{x}_0$ is progressively corrupted by Gaussian noise across $T$ timesteps according to a variance schedule $\{\beta_t\}_{t=1}^T$:
+Score-based diffusion models learn to generate data by reversing a forward noising process. In the forward process, data $`\mathbf{x}_0`$ is progressively corrupted by Gaussian noise across $`T`$ timesteps according to a variance schedule $`\{\beta_t\}_{t=1}^T`$:
 
 $$q(\mathbf{x}_t | \mathbf{x}_{t-1}) = \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t}\, \mathbf{x}_{t-1},\, \beta_t \mathbf{I})$$
 
