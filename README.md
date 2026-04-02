@@ -353,7 +353,7 @@ The four blocks are concatenated along the batch axis, producing arrays of shape
 
 The discriminator is trained as a binary classifier: real reference windows are labelled 0, synthetic windows from each generator are labelled 1. Training uses the binary cross-entropy loss:
 
-$$\mathcal{L}_{\text{disc}} = -\mathbb{E}_{\mathbf{x} \sim p_{\text{real}}}\left[\log D(\mathbf{x})\right] - \mathbb{E}_{\mathbf{x} \sim p_{\text{synth}}}\!\left[\log(1 - D(\mathbf{x}))\right]$$
+$$\mathcal{L}_{\text{disc}} = -\mathbb{E}_{\mathbf{x} \sim p_{\text{real}}}\left[\log D(\mathbf{x})\right] - \mathbb{E}_{\mathbf{x} \sim p_{\text{synth}}}\left[\log(1 - D(\mathbf{x}))\right]$$
 
 The ensemble consists of $M$ independently initialised and trained TCNs. Each member is trained on a different bootstrap resample of the training windows, introducing diversity through data perturbation rather than architectural variation. Class imbalance between the single real series and multiple synthetic generators is addressed by upsampling real windows to match the total synthetic count.
 
@@ -455,4 +455,4 @@ where $\hat{S}$ is sample skewness and $\hat{\kappa}$ excess kurtosis. The test 
 
 $$\frac{R(n)}{S(n)} \sim c \cdot n^H$$
 
-where $R(n) = \max_{1 \leq k \leq n} \sum_{t=1}^k (r_t - \bar{r}) - \min_{1 \leq k \leq n} \sum_{t=1}^k (r_t - \bar{r})$ is the range of cumulative deviations and $S(n)$ is the standard deviation over a window of length $n$. A log-log regression of $R(n)/S(n)$ against $n$ over a range of window sizes yields $\hat{H}$. For real equity returns in absolute value, $\hat{H} \approx 0.6$–$0.7$ is typical. The test compares $\hat{H}_{\text{synth}}$ against a bootstrap confidence interval around $\hat{H}_{\text{real}}$, separately for raw returns and for absolute returns.
+where $R(n) = \max_{1 \leq k \leq n} \sum_{t=1}^k (r_t - \bar{r}) - \min_{1 \leq k \leq n} \sum_{t=1}^k (r_t - \bar{r})$ is the range of cumulative deviations and $S(n)$ is the standard deviation over a window of length $n$. A log-log regression of $R(n)/S(n)$ against $n$ over a range of window sizes yields $\hat{H}$. For real equity returns in absolute value, $\hat{H} \approx 0.6$–$0.7$ is typical. The test compares $`\hat{H}_{\text{synth}}`$ against a bootstrap confidence interval around $`\hat{H}_{\text{real}}`$, separately for raw returns and for absolute returns.
