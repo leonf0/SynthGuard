@@ -15,7 +15,7 @@ class CVAEModel(nn.Module):
     ):
         super().__init__()
         self.latent_dim = latent_dim
-        enc_in = window + N_REGIMES + 1  # window + regime_onehot + target
+        enc_in = window + N_REGIMES + 1  
         self.encoder = nn.Sequential(
             nn.Linear(enc_in, hidden_dim), nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
@@ -79,7 +79,6 @@ def train_cvae(
     lr: float = 1e-3,
     patience: int = 10,
 ) -> Tuple[CVAEModel, float]:
-    """Train CVAE; returns model and residual scale."""
     n = len(y_targets)
     split = int(0.85 * n)
     ds_train = TensorDataset(
